@@ -1,0 +1,85 @@
+<!-- jQuery -->
+<script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+
+<script>
+    '{% for task in task_list %}'
+        var task_pk = '{{ task.pk }}'
+        var conct = '#'+task_pk;
+        "{% if task.completed == False %}"
+            "{% if task.priority == 'high' %}"
+                $(conct).addClass('table-danger');
+            "{% elif task.priority == 'medium' %}"
+                $(conct).addClass('table-warning');
+            "{% else %}"
+                $(conct).addClass('table-info');
+            "{% endif %}"
+        "{% else %}"
+            $(conct).addClass('table-success');
+        "{% endif %}"
+    '{% endfor %}'
+</script>
+
+{% if task_list %}
+<table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col" style="text-align: center;">Task</th>
+                <th scope="col" style="text-align: center;">Due Date</th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in task_list %}
+            <tr id='{{task.pk}}'>
+                <td id="task-title">{{ task.title }}</td>
+                <td>{{ task.date_due }}</td>
+                <td>
+                    <form method="get" action="{% url 'comment_update' task.comment.pk %}" data-href="{% url 'comment_update' task.comment.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="comment-btn">
+                            <i class="fa fa-sticky-note-o sticky-note-fa" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </td>
+                <td>
+                    {% if task.comment.attachment.name %}
+                        <a href="{{ task.comment.attachment.url }}">
+                            <i class="fa fa-paperclip paperclip-link-fa" aria-hidden="true"></i>
+                        </a>
+                    {% else %}
+                        <a>
+                            <i class="fa fa-paperclip paperclip-fa" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                </td>
+                <td>
+                    <form id="task_delete_form" method="post" action="{% url 'task_delete' task.pk %}" data-href="{% url 'task_delete' task.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-btn">
+                            <i class="fa fa-trash-o trash-fa" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </td>
+                <td>
+                    <form id="task_completed_form" method="post" action="{% url 'task_completed' task.pk %}" data-href="{% url 'task_completed' task.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="completed-btn">
+                            {% if task.completed == False %}
+                                <i class="fa fa-check check-fa" aria-hidden="true"></i>
+                            {% else %}
+                                <i class="fa fa-check check-done-fa" aria-hidden="true"></i>
+                            {% endif %}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <br><br>
+    <h3>You Haven't added anything yet</h3>
+{% endif %}

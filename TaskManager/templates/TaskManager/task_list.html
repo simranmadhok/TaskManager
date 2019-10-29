@@ -1,0 +1,274 @@
+{% extends "TaskManager/base.html" %} 
+{% block title %}Dashboard{% endblock %} 
+{% block content %}
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="../../static/assets/css/task_list.css">
+<script>
+$(document).ready(function () {
+    
+
+    function set_priority(){
+    '{% for task in task_list %}'
+        var task_pk = '{{ task.pk }}'
+        var conct = '#'+task_pk;
+        "{% if task.completed == False %}"
+            "{% if task.priority == 'high' %}"
+                $(conct).addClass('table-danger');
+            "{% elif task.priority == 'medium' %}"
+                $(conct).addClass('table-warning');
+            "{% else %}"
+                $(conct).addClass('table-info');
+            "{% endif %}"
+        "{% else %}"
+            $(conct).addClass('table-success');
+        "{% endif %}"
+    '{% endfor %}'
+    }
+
+    set_priority();
+
+    $(document).on('submit', '#task-form', function(e){
+        var input_date = $("#id_date_due").val();
+        var q = new Date();
+        var m = q.getMonth()+1;
+        var d = q.getDate();
+        var y = q.getFullYear();
+        var today = y+'-'+m+'-'+d
+        if(input_date>=today){
+            $.ajax({ 
+                type: 'POST', 
+                url: '{% url "task_list" %}', 
+                data: $("#task-form").serialize(),
+                context: this,
+                success: function(data, status) {
+                    $('#task-container').html(data);
+                    $('#task-form').each(function(){ 
+                        this.reset();
+                    });
+                    if ($("#date_error_msg").length){
+                        $("#date_error_msg").css("display", "none");
+                    }
+                },
+                error: function (err) {
+                    alert(err.status + " " + err.statusText);
+                }
+            });
+            return false;
+        }
+        else{
+            e.preventDefault();
+            if (!$("#date_error_msg").length || $("#date_error_msg").css('display') == 'none'){
+                var error_msg = "Please enter a valid date"
+                $("#create-task-container").prepend('<br><div class="alert alert-danger" id="date_error_msg" style="display:block"><strong>'+error_msg+'</strong></div>');
+            }
+        }
+    });
+
+    $(document).on('submit', '#task_delete_form', function(e){
+        e.preventDefault();
+        $.ajax({ 
+            type: 'POST', 
+            url: $(this).attr("data-href"),
+            data: $("#task_delete_form").serialize(),
+            context: this,
+            success: function(data, status) {
+                $('#task-container').html(data);
+            },
+            error: function (err) {
+                alert(err.status + " " + err.statusText);
+            }
+        });
+        return false;
+    });
+
+    $(document).on('submit', '#task_completed_form', function(e){
+        e.preventDefault();
+        $.ajax({ 
+            type: 'POST', 
+            url: $(this).attr("data-href"),
+            data: $("#task_completed_form").serialize(),
+            context: this,
+            success: function(data, status) {
+                $('#task-container').html(data);
+            },
+            error: function (err) {
+                alert(err.status + " " + err.statusText);
+            }
+        });
+        return false;
+    });
+
+    // $(document).on('submit', '#comments_update_form', function(e){
+    //     e.preventDefault();
+    //     $.ajax({ 
+    //         type: 'POST', 
+    //         url: $(this).attr("data-href"),
+    //         data: $("#comments_update_form").serialize(),
+    //         context: this,
+    //         success: function(data, status) {
+    //             $('#task-container').html(data);
+    //             $("#commentModal").modal('hide');
+    //         },
+    //         error: function (err) {
+    //             alert(err.status + " " + err.statusText);
+    //         }
+    //     });
+    //     return false;
+    // });
+
+    '{% if task_comments_form %}'
+        $("#commentModal").modal('show');
+    '{% endif %}'
+
+ 
+});
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<div id="header">
+    <form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+        <button type='submit' class="btn btn-primary">
+            Logout&nbsp;
+            <i class="fa fa-sign-out" aria-hidden="true"></i>
+        </button>
+    </form>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-5" id="create-task-container">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Create Task</h3><br>
+                    <form method="post" enctype="multipart/form-data" id="task-form">
+                        {% csrf_token %}
+                        {{task_form.title}}<br>
+                        <label>Select Priority</label><br>
+                        {{task_form.priority}}<br>
+                        <label>Select Due Date</label><br>
+                        {{task_form.date_due}}<br>
+                        <button type="submit" class="btn btn-success">Submit</button>
+                    </form>
+                </div>
+            </div>
+            <br>
+            <div class="card">
+                <div class="card-body">
+                    <h4>Task Status Information</h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item list-group-item-success">Completed</li>
+                        <li class="list-group-item list-group-item-danger">High Priority</li>
+                        <li class="list-group-item list-group-item-warning">Medium Priority</li>
+                        <li class="list-group-item list-group-item-info">Low Priority</li>
+                    </ul>
+                </div>    
+            </div>    
+        </div>
+        <div class="col-sm-7">
+            <h3>My Task List</h3>
+            <hr><br>
+            <div id="task-container">
+                {% if task_list %}
+                    <table class="table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th scope="col" style="text-align: center;">Task</th>
+                                <th scope="col" style="text-align: center;">Due Date</th>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for task in task_list %}
+                            <tr id='{{task.pk}}'>
+                                <td id="task-title">{{ task.title }}</td>
+                                <td>{{ task.date_due }}</td>
+                                <td>
+                                    <form method="get" action="{% url 'comment_update' task.comment.pk %}" data-href="{% url 'comment_update' task.comment.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="comment-btn">
+                                            <i class="fa fa-sticky-note-o sticky-note-fa" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    {% if task.comment.attachment.name %}
+                                        <a href="{{ task.comment.attachment.url }}">
+                                            <i class="fa fa-paperclip paperclip-link-fa" aria-hidden="true"></i>
+                                        </a>
+                                    {% else %}
+                                        <a>
+                                            <i class="fa fa-paperclip paperclip-fa" aria-hidden="true"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form id="task_delete_form" method="post" action="{% url 'task_delete' task.pk %}" data-href="{% url 'task_delete' task.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="delete-btn">
+                                            <i class="fa fa-trash-o trash-fa" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form id="task_completed_form" method="post" action="{% url 'task_completed' task.pk %}" data-href="{% url 'task_completed' task.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="completed-btn">
+                                            {% if task.completed == False %}
+                                                <i class="fa fa-check check-fa" aria-hidden="true"></i>
+                                            {% else %}
+                                                <i class="fa fa-check check-done-fa" aria-hidden="true"></i>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <br><br>
+                    <h3>You Haven't added any Task yet</h3>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if task_comments_form %}
+    <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="commentModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Task Comments</h4>
+                </div>
+                <form id="comments_update_form" action="{% url 'comment_update' task_comment_obj.pk %}" method="post" enctype="multipart/form-data" data-href="{% url 'comment_update' task_comment_obj.pk %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        {{ task_comments_form.attachment }}
+                        {{ task_comments_form.comments }}
+                    </div>
+                    <div class="modal-footer">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                            <div class="col-sm-6">
+                                <button type="submit" class="btn btn-info">Update</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+
+</div>
+
+{% endblock %}

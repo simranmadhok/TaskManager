@@ -1,0 +1,124 @@
+/* CSS Styling for task_list.html */
+
+.icon-holder{
+    background-color: transparent;
+}
+
+.sticky-note-fa{
+    color:darkslategrey;
+    font-size: 30px;
+    display: block;
+    margin: auto;
+    text-align: center;
+}
+
+.paperclip-fa{
+    color:black;
+    font-size: 30px;
+    display: block;
+    margin: auto;
+    text-align: center;
+}
+
+.paperclip-link-fa{
+    color:blue;
+    font-size: 30px;
+    display: block;
+    margin: auto;
+    text-align: center;
+}
+
+.check-fa{
+    color:white;
+    font-size: 30px;
+    display: block;
+    margin: auto;
+    text-align: center;
+}
+
+.check-done-fa{
+    color:darkgreen;
+    font-size: 30px;
+    display: block;
+    margin: auto;
+    text-align: center;
+}
+
+.trash-fa:hover:before {
+    color: lightcoral;
+    display: block;
+    margin: auto;
+    text-align: center;
+}
+
+.trash-fa {
+    color:red;
+    font-size: 30px;
+    display: block;
+    margin: auto;
+    text-align: center;     
+}
+
+.info-circle-fa:hover:before {
+    color: lightblue;
+    display: block;
+    margin: auto;
+    text-align: center;
+}
+
+.info-circle-fa {
+    color:blue;
+    font-size: 30px;
+    display: block;
+    margin: auto;
+    text-align: center;
+}
+
+.sticky-note-fa:hover:before {
+    color: green;
+    display: block;
+    margin: auto;
+    text-align: center;
+}
+
+.sticky-note-fa {
+    color:darkgrey;
+    font-size: 30px;
+    display: block;
+    margin: auto;
+    text-align: center;
+}
+
+.delete-btn, .comment-btn, .completed-btn{
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+    border: 0;
+    background: transparent;
+}
+
+#task-container{
+    overflow: scroll;
+    height: 480px;
+    width: 660px;
+    text-align:center;
+}
+
+#header{
+    padding-top:20px;
+    padding-right:20px;
+    float: right;
+}
+
+.h3{
+    text-align: center;
+}
+
+.container{
+    padding-top:90px;
+}
+
+.label{
+    font-weight: bold;
+}
