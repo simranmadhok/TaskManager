@@ -13,7 +13,8 @@ IV) Addition of comments, file attachments(downloadable) for specific tasks
 2. Run requirements.txt file (install Python packages as req.)
 3. Make database migrations
 4. Add EMAIL_HOST_USER, EMAIL_HOST_PASSWORD values and make appropriate settings i.e. secure-access off in email settings (to enable forgot pwd functionality)
-5. Test application, url endpoints(based on @login_required decorator for certain endpoints)
+5. Create 'media' folder in root directory
+6. Test application, url endpoints(based on @login_required decorator for certain endpoints)
 
 # Deployment
 
